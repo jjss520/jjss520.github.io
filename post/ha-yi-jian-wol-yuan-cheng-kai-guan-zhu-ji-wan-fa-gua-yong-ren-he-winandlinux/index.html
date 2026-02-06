@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>HA一键WOL远程开关主机玩法（适用任何win&amp;linux） | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="第一步，Windows主机部署OpenSSH服务，Linux主机可以跳过此步。
+第二步，进入HA的SSH生成密匙对，并将公匙放置受控主机authorized_keys里
+进入HA容器
+docker exec -it homeassistan..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">HA一键WOL远程开关主机玩法（适用任何win&amp;linux）</h2>
+            <div class="post-date">2026-02-06</div>
+            
+            <div class="post-content" v-pre>
+              <p>第一步，Windows主机部署OpenSSH服务，Linux主机可以跳过此步。</p>
+<p>第二步，进入HA的SSH生成密匙对，并将公匙放置受控主机authorized_keys里<br>
+进入HA容器</p>
+<p>docker exec -it homeassistant /bin/sh<br>
+HA的SSH下输入</p>
+<p>ssh-keygen<br>
+生成密匙对<br>
+然后输入ls /root/.ssh/ -a查看目录下是否已生成id_rsa.pub公钥文件<br>
+退出容器的终端，回到宿主机的终端，输入</p>
+<p>cp /root/.ssh/id_ed25519.pub /config/id_ed25519.pub<br>
+第三步：拷贝生成的公匙到受控主机<br>
+Win系统：使用WinSCP这个软件登录宿主机，用户名和密码与宿主机SSH登录名密码一致，把宿主机上/tmp/id_rsa.pub文件拷贝回Windows系统目录上，为了举例方便，我拷贝至C:\Users\Administrator.ssh\里，Administrator是有管理员权限的用户，.ssh目录如果不存在，请先在cmd用mkdir .ssh创建此目录，右键无法新建。然后把id_rsa.pub复制一份并改名为authorized_keys，然后再拷贝一份id_rsa.pub至C:\ProgramData\ssh目录下并改名为administrators_authorized_keys</p>
+<p>C:\Users\管理员用户名.ssh\authorized_keys</p>
+<p>C:\ProgramData\ssh\administrators_authorized_keys</p>
+<p>Linux系统：受控主机输入scp HA宿主机管理用户名@HA宿主机IP:/tmp/id_rsa.pub /root/.ssh/authorized_keys把id_rsa.pub拷贝成authorized_keys放在.ssh目录下</p>
+<p>第四步：HA测试SSH连接受控主机<br>
+回到HA的终端，输入命令ssh 电脑主机用户名@受控主机IP，例如ssh Administrator@192.168.1.110，第一次可能会提示添加密匙，键入yes回车就行了。然后看看是否会提示输入受控主机的用户名和密码，如果没有提示，则通过密匙免密登录受控机成功，然后HA就可以通过shell command来控制受控主机了！</p>
+<p>HA的配置部分，实体为开关，yaml内容参考：</p>
+<p>#唤醒电脑<br>
+switch:</p>
+<ul>
+<li>platform: wake_on_lan<br>
+mac: &quot;84:47:09:3B:DE:D6&quot;<br>
+name: &quot;imini Pro&quot;<br>
+host: &quot;10.10.10.118&quot;<br>
+turn_off:<br>
+service: shell_command.suspend_imini<br>
+#关闭电脑<br>
+shell_command:<br>
+suspend_imini: &quot;ssh ddymh@10.10.10.118 shutdown.exe -s -t 60&quot;</li>
+</ul>
+<ol>
+<li>确保 Windows 启用了 SSH 服务器<br>
+Windows 10/11 和 Windows Server 2019+ 版本内置了 OpenSSH 服务器，但默认未启用。</li>
+</ol>
+<p>检查 SSH 服务是否运行：<br>
+在目标 Windows 主机上，打开 PowerShell（管理员权限）运行：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>Get-Service -Name sshd</p>
+<p>如果状态为 Stopped，请启动 SSH 服务器：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>Start-Service sshd</p>
+<p>要设置 SSH 服务器开机自启，可以运行：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>Set-Service -Name sshd -StartupType Automatic</p>
+<ol start="2">
+<li>检查 SSH 端口是否监听<br>
+在 Windows 目标主机上，运行以下命令检查 SSH 服务器是否监听 22 端口：</li>
+</ol>
+<p>powershell<br>
+复制编辑</p>
+<p>netstat -an | findstr :22</p>
+<p>如果没有输出，可能 SSH 服务器未运行，或者监听的不是默认端口。</p>
+<ol start="3">
+<li>检查 Windows 防火墙是否拦截 SSH<br>
+默认情况下，Windows 防火墙可能阻止 SSH 连接。你可以手动允许端口 22：</li>
+</ol>
+<p>在 PowerShell（管理员权限）中运行：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>New-NetFirewallRule -Name &quot;SSH&quot; -DisplayName &quot;OpenSSH Server (22)&quot; -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22</p>
+<p>或者手动打开防火墙规则：</p>
+<p>打开“Windows Defender 防火墙”</p>
+<p>点击“高级设置”</p>
+<p>在“入站规则”中，查找“OpenSSH Server (sshd)”</p>
+<p>确保它是“已启用”状态，如果没有，右键 → 启用。</p>
+<ol start="4">
+<li>确保 Windows 允许你的账户使用 SSH<br>
+Windows SSH 服务器要求你的账户属于 Administrators 或 Remote Management Users 组。</li>
+</ol>
+<p>你可以在 PowerShell（管理员权限）中运行：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>net localgroup &quot;Remote Management Users&quot;</p>
+<p>如果 ddymh 用户不在该组中，可以添加：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>net localgroup &quot;Remote Management Users&quot; ddymh /add</p>
+<ol start="5">
+<li>确保 Windows SSH 配置允许密码登录<br>
+Windows SSH 可能默认只允许密钥登录，而不允许密码登录。<br>
+检查并修改 sshd_config（默认在 C:\ProgramData\ssh\sshd_config）：</li>
+</ol>
+<p>打开 PowerShell（管理员权限），运行：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>notepad C:\ProgramData\ssh\sshd_config</p>
+<p>确保以下选项 没有 # 号注释：</p>
+<p>plaintext<br>
+复制编辑</p>
+<p>PasswordAuthentication yes PubkeyAuthentication yes</p>
+<p>然后重启 SSH 服务：</p>
+<p>powershell<br>
+复制编辑</p>
+<p>Restart-Service sshd</p>
+<ol start="6">
+<li>目标 Windows 是否监听的是非 22 端口<br>
+如果 Windows SSH 监听的是其他端口，比如 2222，你需要在 SSH 连接时指定：</li>
+</ol>
+<p>sh<br>
+复制编辑</p>
+<p>ssh -p 2222 ddymh@10.10.10.118</p>
+<p>可以按这个流程检查一下，看 SSH 是否可以连接成功。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/wan-ke-yun-docker-qing-long-mian-ban-an-zhuang-aligo-mo-kuai/">
+                  <h3 class="post-title">
+                    玩客云docker青龙面板安装aligo模块
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

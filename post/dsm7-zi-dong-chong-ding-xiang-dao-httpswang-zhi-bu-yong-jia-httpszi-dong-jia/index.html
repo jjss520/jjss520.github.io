@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>DSM7自动重定向到https,网址不用加https，自动加 | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="
+【设置反向代理 - 一定要打开HSTS以及HTTP/2】 DSM7中没有HTTP/2选项，改为打开HSTS即可
+【修改群晖nginx配置模板】 DSM7中把HSTS模板文件单独拎出来了，不需要修改Portal.mustache文件，仅仅需..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">DSM7自动重定向到https,网址不用加https，自动加</h2>
+            <div class="post-date">2026-02-05</div>
+            
+            <div class="post-content" v-pre>
+              <ol>
+<li>【设置反向代理 - 一定要打开HSTS以及HTTP/2】 DSM7中没有HTTP/2选项，改为打开HSTS即可</li>
+<li>【修改群晖nginx配置模板】 DSM7中把HSTS模板文件单独拎出来了，不需要修改Portal.mustache文件，仅仅需要修改/usr/syno/share/nginx/HSTS.mustache文件。<br>
+命令： sudo vi HSTS.mustache 然后按 i 进入编辑模式<br>
+在正常来说DSM7.0只有一行文字在里面，在文件末尾添加lz给的代码<br>
+error_page 497 https://<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>h</mi><mi>o</mi><mi>s</mi><mi>t</mi><mo>:</mo></mrow><annotation encoding="application/x-tex">host:</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">h</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">:</span></span></span></span>server_port$request_uri;<br>
+然后:wq保存即可<br>
+3.【修改完模板后，重启nginx服务】DSM7中命令已改为 synosystemctl restart nginx<br>
+4.【生成的配置文件server.ReverseProxy.conf就在该目录下】 该目录在DSM7中已改为 /etc/nginx/sites-enabled</li>
+</ol>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/nodered-an-zhuang-ffmpeg/">
+                  <h3 class="post-title">
+                    nodered安装ffmpeg
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

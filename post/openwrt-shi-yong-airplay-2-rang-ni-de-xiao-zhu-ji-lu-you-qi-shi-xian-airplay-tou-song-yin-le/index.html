@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>OpenWrt使用AirPlay 2让你的小主机/路由器实现AirPlay投送音乐 | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="OpenWrt 默认精简内核，没有包含 PC 声卡所需的内核模块，特别是你这个 Intel HDA 声卡需要的模块 kmod-sound-hda-intel 和相关依赖 不在系统中。0000000
+
+✅ 解决方案
+① 安装必要模块
+运行以下..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">OpenWrt使用AirPlay 2让你的小主机/路由器实现AirPlay投送音乐</h2>
+            <div class="post-date">2026-02-06</div>
+            
+            <div class="post-content" v-pre>
+              <p>OpenWrt 默认精简内核，<strong>没有包含 PC 声卡所需的内核模块</strong>，特别是你这个 Intel HDA 声卡需要的模块 <code>kmod-sound-hda-intel</code> <strong>和相关依赖</strong> 不在系统中。0000000</p>
+<hr>
+<h2 id="解决方案">✅ <strong>解决方案</strong></h2>
+<h3 id="1-安装必要模块">① 安装必要模块</h3>
+<p>运行以下命令安装声卡驱动相关模块：</p>
+<p>复制编辑</p>
+<pre><code class="language-sql">opkg update
+opkg install kmod-sound-core kmod-sound-hda-core kmod-sound-hda-intel alsa-utils
+</code></pre>
+<blockquote>
+<p>说明：kmod-sound-core：加载声音系统核心支持。kmod-sound-hda-core：HDA 总线核心支持。kmod-sound-hda-intel：Intel HDA 控制器驱动。alsa-utils：提供 aplay、alsamixer 等命令。</p>
+</blockquote>
+<hr>
+<h3 id="2-加载驱动模块如未自动加载">② 加载驱动模块（如未自动加载）</h3>
+<pre><code class="language-undefined">modprobe snd-hda-intel
+</code></pre>
+<p>查看是否加载成功：</p>
+<pre><code class="language-perl">lsmod | grep hda
+</code></pre>
+<hr>
+<h3 id="3-查看-alsa-声卡信息">③ 查看 ALSA 声卡信息</h3>
+<pre><code class="language-bash">cat /proc/asound/cards
+</code></pre>
+<p>若此时出现 Intel HDA 相关内容，再执行：</p>
+<pre><code class="language-undefined">aplay -l
+</code></pre>
+<h2 id="修改设置默认的播放声卡"><strong>修改设置默认的播放声卡。</strong></h2>
+<p>首先替换以下命令的X跟Y为你自己的设备ID，X修改为card后面的值，Y修改为device后面的值。</p>
+<p>defaults.ctl.card x<br>
+defaults.pcm.card x<br>
+defaults.timer.card x<br>
+defaults.pcm.device y</p>
+<pre><code class="language-undefined">defaults.ctl.card 0
+defaults.pcm.card 0
+defaults.timer.card 0
+defaults.pcm.device 0
+</code></pre>
+<p>找到etc/asound.conf进行修改，将替换后的命令粘贴进去、保存。</p>
+<p>然后启用Apple AirPlay 2插件，再reboot重启即可。</p>
+<p><strong>后续小坑填补</strong></p>
+<p>openwrt默认是最大音量播放，我第一次投屏就被吓到。所以出现声音过大可以调整默认播放的音量。</p>
+<p>依旧SSH输入&quot;alsamixer&quot;命令调整播放的音量。</p>
+<p>![OpenWrt使用AirPlay 2让你的小主机/路由器实现AirPlay投送音乐]<br>
+<img src="https://jjss520.github.io/post-images/1770343692182.jpg" alt="" loading="lazy"></p>
+<p>通过键盘左右箭头移动到speaker，用上下调整你想要的音量，调整完成后按esc退出即可。此刻调整是实时的，但是重启后依旧会默认100的音量。所以需要进一步设置，确保重启后音量不会默认最大。</p>
+<p>调整完音量，esc退出后。SSH输入&quot;alsactl --file /etc/asound.state store&quot;命令。然后找到etc/rc.local这个文件，将&quot;alsactl --file /etc/asound.state restore&quot;黏贴进去，再保存即可。以后重启都是按你设置的音量播放。</p>
+<p>![OpenWrt使用AirPlay 2让你的小主机/路由器实现AirPlay投送音乐]<br>
+<img src="https://jjss520.github.io/post-images/1770343698946.jpg" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/openwrt-pei-zhi-dlna-ke-hu-duan/">
+                  <h3 class="post-title">
+                    openwrt配置DLNA客户端
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>openwrt配置DLNA客户端 | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content=". 安装 USB 音频驱动
+更新软件包列表并安装 USB 音频内核模块：
+opkg update
+opkg install kmod-usb-audio #不是USB声卡，不用装
+目的：确保系统能够识别 USB 音频设备。
+
+安装播放组件
+..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">openwrt配置DLNA客户端</h2>
+            <div class="post-date">2026-02-05</div>
+            
+            <div class="post-content" v-pre>
+              <p>. 安装 USB 音频驱动<br>
+更新软件包列表并安装 USB 音频内核模块：</p>
+<p>opkg update<br>
+opkg install kmod-usb-audio #不是USB声卡，不用装</p>
+<p>目的：确保系统能够识别 USB 音频设备。</p>
+<ol>
+<li>安装播放组件<br>
+安装 MPD、UPnP/DLNA 客户端和 ALSA 工具：</li>
+</ol>
+<p>opkg install mpd-mini upmpdcli alsa-utils<br>
+目的：安装音乐播放守护进程 (mpd-mini)、UPnP/DLNA 客户端 (upmpdcli) 和音频配置工具 (alsa-utils)。</p>
+<ol start="3">
+<li>配置音频输出</li>
+</ol>
+<p>3.1 获取声卡的设备值<br>
+检查声卡设备（假设只有一个声卡，通常为 hw:0,0）：</p>
+<p>aplay -L<br>
+目的：列出可用声卡，确认设备名称和编号（如 hw:0,0 或 hw:CARD=AUDIO,DEV=0）。</p>
+<p>3.2 获取声卡的硬件音量控制参数<br>
+查看声卡的混音控制（mixer control）和索引（mixer index），-c 0 表示第一个声卡（多个声卡依次为 1、2 等）：</p>
+<p>amixer -c 0 scontrols<br>
+目的：获取硬件音量控制参数（如 PCM）和索引值（通常为 0）。</p>
+<p>3.3 生成 MPD 配置文件 /etc/mpd.conf<br>
+根据声卡支持情况，生成配置文件：</p>
+<p>cat &lt;&lt; EOF &gt;  /etc/mpd.conf<br>
+audio_output {<br>
+type            &quot;alsa&quot;<br>
+name            &quot;My ALSA Device&quot;<br>
+device          &quot;hw:CARD=PCH,DEV=0&quot;<br>
+mixer_type      &quot;hardware&quot;<br>
+mixer_device    &quot;hw:CARD=PCH&quot;<br>
+mixer_control   &quot;PCM&quot;<br>
+mixer_index     &quot;0&quot;<br>
+}<br>
+4.修改MPD运行用户</p>
+<p>sed -i 's#USER=&quot;mpd&quot;#USER=&quot;root&quot;#' /etc/init.d/mpd<br>
+sed -i 's#GROUP=&quot;mpd&quot;#GROUP=&quot;root&quot;#' /etc/init.d/mpd<br>
+5.重启mpd（报错不影响使用）</p>
+<p>service mpd restart<br>
+6.设置upmpdcli的名称</p>
+<p>uci set upmpdcli.lan.friendly_name=OpenWrt<br>
+uci commit  upmpdcli<br>
+service upmpdcli restart</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/dsm7-zi-dong-chong-ding-xiang-dao-httpswang-zhi-bu-yong-jia-httpszi-dong-jia/">
+                  <h3 class="post-title">
+                    DSM7自动重定向到https,网址不用加https，自动加
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

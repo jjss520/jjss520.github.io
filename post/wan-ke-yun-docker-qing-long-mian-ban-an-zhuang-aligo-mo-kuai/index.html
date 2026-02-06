@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>玩客云docker青龙面板安装aligo模块 | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="apt install libjpeg-dev zlib1g-dev libpng-dev #debian
+#玩客云
+sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/a..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">玩客云docker青龙面板安装aligo模块</h2>
+            <div class="post-date">2026-02-06</div>
+            
+            <div class="post-content" v-pre>
+              <p>apt install libjpeg-dev zlib1g-dev libpng-dev #debian<br>
+#玩客云<br>
+sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories<br>
+apk update<br>
+apk add --update python3-dev py3-setuptools gcc musl-dev<br>
+apk add --update jpeg-dev freetype-dev zlib-dev libwebp-dev openjpeg-dev tiff-dev libpng-dev<br>
+pip3 install pillow<br>
+pip3 install aligo</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/man-bu-zhe-ma1-xiu-gai-re-dian-di-zhi-dlna-di-zhi/">
+                  <h3 class="post-title">
+                    漫步者 MA1 修改热点地址，dlna地址
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

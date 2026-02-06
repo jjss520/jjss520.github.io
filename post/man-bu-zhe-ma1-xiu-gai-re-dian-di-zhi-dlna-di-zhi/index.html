@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>漫步者 MA1 修改热点地址，dlna地址 | DD的笔记</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://jjss520.github.io/favicon.ico?v=1770348147594">
+<link rel="stylesheet" href="https://jjss520.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="第一阶段：获取永久 Root 权限
+原理：利用 /sbin/internet.sh 脚本中的逻辑漏洞，该脚本会读取 NVRAM 中的 Login 和 Password 变量，并自动在 /etc/passwd 中创建一个 UID 为 0 (最..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://jjss520.github.io">
+        <img src="https://jjss520.github.io/images/avatar.png?v=1770348147594" class="site-logo">
+        <h1 class="site-title">DD的笔记</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      个人笔记
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://jjss520.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">漫步者 MA1 修改热点地址，dlna地址</h2>
+            <div class="post-date">2026-02-06</div>
+            
+            <div class="post-content" v-pre>
+              <p>第一阶段：获取永久 Root 权限<br>
+原理：利用 /sbin/internet.sh 脚本中的逻辑漏洞，该脚本会读取 NVRAM 中的 Login 和 Password 变量，并自动在 /etc/passwd 中创建一个 UID 为 0 (最高权限) 的账户。</p>
+<p>操作步骤：</p>
+<p>在串口 (Serial) 或临时的 Shell 中执行以下命令：</p>
+<p>Bash</p>
+<h1 id="1-设置管理员用户名为-root">1. 设置管理员用户名为 root</h1>
+<p>nvram_set 2860 Login &quot;root&quot;</p>
+<h1 id="2-设置管理员密码为-123456-或者你想设的任何密码">2. 设置管理员密码为 123456 (或者你想设的任何密码)</h1>
+<p>nvram_set 2860 Password &quot;123456&quot;</p>
+<h1 id="3-提交修改到闪存-至关重要">3. 提交修改到闪存 (至关重要)</h1>
+<p>ralink_init gen 2860</p>
+<h1 id="4-重启生效">4. 重启生效</h1>
+<p>reboot<br>
+结果：</p>
+<p>重启后，你可以通过 Telnet (端口 23) 使用账号 root 和密码 123456 登录，拥有完全控制权。</p>
+<p>第二阶段：修改 LAN 口 IP (解决网段冲突)<br>
+原理：音箱的 WAN 口获取的 IP 是 10.10.10.x，而默认 LAN 口也是 10.10.10.x，导致路由冲突。我们需要将 LAN 口迁移到 192.168.50.x 网段。</p>
+<p>操作步骤：</p>
+<p>登录 Root 后执行以下命令：</p>
+<p>Bash</p>
+<h1 id="1-修改-lan-口-热点-的自身-ip-地址">1. 修改 LAN 口 (热点) 的自身 IP 地址</h1>
+<p>nvram_set 2860 lan_ipaddr &quot;192.168.50.254&quot;</p>
+<h1 id="2-修改-dhcp-分配池的开始和结束地址-确保在同一网段">2. 修改 DHCP 分配池的开始和结束地址 (确保在同一网段)</h1>
+<p>nvram_set 2860 dhcpStart &quot;192.168.50.100&quot;<br>
+nvram_set 2860 dhcpEnd &quot;192.168.50.200&quot;</p>
+<h1 id="3-指定网关和-dns-为音箱自己-防止连接热点的设备无法上网">3. 指定网关和 DNS 为音箱自己 (防止连接热点的设备无法上网)</h1>
+<p>nvram_set 2860 dhcpGateway &quot;192.168.50.254&quot;<br>
+nvram_set 2860 dhcpPriDns &quot;192.168.50.254&quot;</p>
+<h1 id="4-提交修改到闪存">4. 提交修改到闪存</h1>
+<p>ralink_init gen 2860</p>
+<h1 id="5-重启生效">5. 重启生效</h1>
+<p>reboot<br>
+最终设备状态一览<br>
+完成上述操作后，你的音箱配置如下：</p>
+<p>项目</p>
+<p>状态/数值</p>
+<p>说明</p>
+<p>权限</p>
+<p>Root (UID 0)</p>
+<p>已破解，拥有最高权限</p>
+<p>登录账号</p>
+<p>root</p>
+<p>登录密码</p>
+<p>123456</p>
+<p>管理方式</p>
+<p>Telnet (端口 23)</p>
+<p>电脑终端输入 telnet IP 即可</p>
+<p>WAN 口 IP</p>
+<p>10.10.10.xxx</p>
+<p>连接家里路由器获取的 IP (用于音箱上网)</p>
+<p>LAN 口 IP</p>
+<p>192.168.50.254</p>
+<p>音箱自身的管理 IP (用于手机连热点)</p>
+<p>网络冲突</p>
+<p>已解决</p>
+<p>内外网段分离，路由正常</p>
+<p>今后管理设备的命令：</p>
+<p>连接音箱热点时：telnet 192.168.50.254</p>
+<p>连接家里路由时：telnet 10.10.10.206 (具体 IP 视路由器分配而定)</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://jjss520.github.io/post/openwrt-shi-yong-airplay-2-rang-ni-de-xiao-zhu-ji-lu-you-qi-shi-xian-airplay-tou-song-yin-le/">
+                  <h3 class="post-title">
+                    OpenWrt使用AirPlay 2让你的小主机/路由器实现AirPlay投送音乐
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
